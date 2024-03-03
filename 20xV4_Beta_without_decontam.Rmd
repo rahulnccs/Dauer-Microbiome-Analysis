@@ -1,0 +1,68 @@
+---
+title: "Creating PSEQ"
+output: html_document
+---
+
+```{r setup, include=FALSE, echo = F}
+library(phyloseq)
+library(ggplot2)
+library(microbiome)
+library(dplyr)
+library(ape)
+library(plotly)
+library(vegan)
+```
+#Inputting phyloseq Object
+```{r eruptions, echo=FALSE}
+rm(list=ls())
+pseq <- readRDS("../input_files/final_Object_4_analysis.rds")
+p<- sort(sample_sums(pseq))
+write.csv(p, "number_of_reads.csv")
+
+```
+
+
+#UNweighted
+```{r}
+pseq.rel.2 <- transform(pseq, "compositional")
+ord_mds_bray1 <- ordinate(pseq.rel.2, method="PCoA", distance="unifrac")
+beta.ps1 <- plot_ordination(pseq.rel.2, 
+                            ord_mds_bray1, 
+                            color="Category") 
+p9 <- beta.ps1 + ggtitle("unweighted unifrac Dauers and controls") + theme_bw(base_size = 12) + theme(plot.title = element_text(size = 12, face= "bold")) +  scale_color_manual(values = c("#33ff33",  "#00cccc","#006666","#ff66ff", "darkblue","#800000","#4B0082","#fb9a99","#FF00FF","dodgerblue3","darkgoldenrod1")) + geom_point( size=8)   + geom_point( size=5)  
+p9
+ggsave("20x_Dauer_unweighted_unifrac.tiff", height = 5, width = 7)
+```
+#beta div after un-weighted
+```{r}
+pseq.rel.2 <- transform(pseq, "compositional")
+ord_mds_bray1 <- ordinate(pseq.rel.2, method = "PCoA", distance = "wunifrac")
+beta.ps1 <- plot_ordination(pseq.rel.2, 
+                            ord_mds_bray1, 
+                            color="Category") 
+p9 <- beta.ps1 + ggtitle("20X_Weighted unifrac Dauers and controls") + theme_bw(base_size = 12) + theme(plot.title = element_text(size = 12, face= "bold")) +  scale_color_manual(values = c("#33ff33",  "#00cccc","#006666","#ff66ff", "darkblue","#800000","#4B0082","#fb9a99","dodgerblue3","darkgoldenrod1")) + geom_point( size=8)   + geom_point( size=5)  
+p9
+ggsave("20x_Dauer_weighted_unifrac.tiff", height = 5, width = 7)
+```
+
+```{r}
+pseq.rel.2 <- transform(pseq, "relative.abundance")
+ord_mds_bray2 <- ordinate(pseq.rel.2, "PCoA", "bray", weighted=F)
+beta.ps2 <- plot_ordination(pseq.rel.2, 
+                            ord_mds_bray2, 
+                            color="Category") 
+p9 <- beta.ps2 + ggtitle("20X_Weighted Bray Curtis Dauers and controls") + theme_bw(base_size = 12) + theme(plot.title = element_text(size = 12, face= "bold")) + scale_color_manual(values = c("#33ff33",  "#00cccc","#006666","#ff66ff", "darkblue","#800000", "#4B0082","#fb9a99","dodgerblue3", "darkgoldenrod1") )  + geom_point( size=8)   + geom_point( size=6)  
+p9
+ggsave("20X_BRAY_curtis_unweighted.tiff", height = 5, width = 7)
+```
+```{r}
+pseq.rel.2 <- transform(pseq, "relative.abundance")
+ord_mds_bray2 <- ordinate(pseq.rel.2, "PCoA", "bray", weighted=TRUE)
+beta.ps2 <- plot_ordination(pseq.rel.2, 
+                            ord_mds_bray2, 
+                            color="Category") 
+p9 <- beta.ps2 + ggtitle("20X_W-bray_curtis_Dauers and controls") + theme_bw(base_size = 12) + theme(plot.title = element_text(size =12, face= "bold")) + scale_color_manual(values = c("#33ff33",  "#00cccc","#006666","#ff66ff", "darkblue","#800000", "#4B0082","#fb9a99","dodgerblue3", "darkgoldenrod1") )  + geom_point( size=8)   + geom_point( size=6)  
+p9
+ggsave("20XBRAY_curtis_weighted.tiff", height = 5, width = 7)
+```
+

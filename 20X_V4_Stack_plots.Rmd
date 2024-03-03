@@ -1,0 +1,95 @@
+---
+title: "SC20_Downstream_Analysis"
+author: "Rahul Bodkhe"
+date: "10/10/2023"
+output: html_document
+runAge: shiny
+---
+
+```{r setup, include=FALSE, echo = F}
+library(phyloseq)
+library(ggplot2)
+library(microbiome)
+library(dplyr)
+library(forcats)
+```
+#make phyloseq objects for Lawn and dauers
+```{r eruptions, echo=FALSE}
+rm(list=ls())
+pseq <- readRDS("../input_files/final_Object_4_analysis.rds")
+sample_data(pseq)
+```
+
+#Family level stack plot
+```{r, echo=FALSE}
+y1 <- tax_glom(pseq, taxrank = 'Phylum') # agglomerate taxa
+y3 <- transform_sample_counts(y1, function(x) x/sum(x)) #get abundance in %
+y4 <- psmelt(y3) 
+y4$Family <- as.character(y4$Phylum) #convert to character
+y4$Family[y4$Abundance < 0.02] <- "Phyla < 2% abund." #rename genera with < 1% abundance
+```
+
+```{r}
+my_colors <- c(  "#ffff00", "#781156","#A51876","#D21E96","#F098D3","#114578","#185EA5","#6CABEA","#6CEAEA","#98C4F0","#117878","#A0A0A0", "#D2D21E","#F7F7C5","#784511","#D2781E","#781122","#D21E2C","#EA6C81","darkblue","#556B2F","#008080","#800000","darkolivegreen1","#fb9a99","#FF00FF","dodgerblue3","#808000","darkgoldenrod1","darkseagreen","#000000","#c51b7d","#5F7FC7","steelblue","brown1", "#5F7FC7" )
+
+p <- ggplot(y4, aes(x = Replicates, y = Abundance, fill = fct_reorder(Phylum, Abundance))) +
+    geom_bar(stat = "identity",position="fill") + # to equal 1
+    theme_classic() +
+    scale_fill_manual(values = my_colors) +
+    theme(text = element_text(size=16),axis.text.y = element_text(hjust=1)) +
+    scale_x_discrete(drop=TRUE) +theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+       guides(fill = guide_legend( keywidth = 1, keyheight = 1)) +
+    ylab("Distribution of ASVs at Phylum level")  + theme(axis.text = element_text(face="bold"))
+p +   theme(panel.grid.major = element_blank()) +  theme(strip.text.x = element_text(size =12))   + facet_grid(cols= vars(Category2))
+
+ggsave("20X_Phylum_level_compo_Dauer2.tiff", height = 6, width = 12)
+```
+
+
+```{r}
+y1 <- tax_glom(pseq, taxrank = 'Family') # agglomerate taxa
+y3 <- transform_sample_counts(y1, function(x) x/sum(x)) #get abundance in %
+y4 <- psmelt(y3) 
+y4$Family <- as.character(y4$Family) #convert to character
+y4$Family[y4$Abundance < 0.02] <- "Families < 2% abund." #rename genera with < 1% abundance
+
+```
+
+```{r}
+my_colors <- c(  "#556b2f", "#781156","#A51876","#000000","#F098D3","#114578","#185EA5","#6CABEA","#6CEAEA","#98C4F0","#008080","#A0A0A0", "#D2D21E","#F7F7C5","#784511","#D2781E","#781122","darkgoldenrod1","#EA6C81","darkblue","#000000","brown1","#800000","darkolivegreen1","#fb9a99",
+                 "#FF00FF","dodgerblue3","#808000","#D21E2C","darkseagreen","#ffff00","#c51b7d","#5F7FC7","steelblue","#117878", "#5F7FC7" )
+p <- ggplot(y4, aes(x = Replicates, y = Abundance, fill = fct_reorder(Family, Abundance))) +
+    geom_bar(stat = "identity",position="fill") + # to equal 1
+    theme_classic() +
+    scale_fill_manual(values = my_colors) +
+    theme(text = element_text(size=16),axis.text.y = element_text(hjust=1)) +
+    scale_x_discrete(drop=TRUE) +theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+       guides(fill = guide_legend( keywidth = 1, keyheight = 1)) +
+    ylab("Distribution of ASVs at family level")  + theme(axis.text = element_text(face="bold"))
+p +   theme(panel.grid.major = element_blank()) +  theme(strip.text.x = element_text(size =12))   + facet_grid(cols= vars(Category2)) + guides(fill = guide_legend(ncol = 1))
+ggsave("20Xfamily_level_Compo_in_Dauers.tiff", height = 6, width = 10)
+```
+
+#Genus_Level stack plot
+```{r}
+y1 <- tax_glom(pseq, taxrank = 'Genus') # agglomerate taxa
+y3 <- transform_sample_counts(y1, function(x) x/sum(x)) #get abundance in %
+y4 <- psmelt(y3) 
+y4$Genus <- as.character(y4$Genus) #convert to character
+y4$Genus[y4$Abundance < 0.03] <- "Genera < 2% abund." #rename genera with < 1% abundance
+
+```
+
+```{r}
+my_colors <- c(  "#ffff00", "#781156","#A51876","#000000","#F098D3","#114578","#185EA5","#6CABEA","#6CEAEA","#98C4F0","#117878","#A0A0A0", "#D2D21E","#F7F7C5","#784511","#D2781E","#781122","#D21E2C","#EA6C81","darkblue","#556B2F","#008080","#800000","darkolivegreen1","#fb9a99","#FF00FF","dodgerblue3","#808000","darkgoldenrod1","darkseagreen","#000000","#c51b7d","#5F7FC7","steelblue","brown1", "#5F7FC7" )
+p <- ggplot(y4, aes(x = Replicates, y = Abundance, fill = fct_reorder(Family, Abundance))) +
+    geom_bar(stat = "identity",position="fill") + # to equal 1
+    theme_classic() +
+    scale_fill_manual(values = my_colors) +
+    theme(text = element_text(size=16),axis.text.y = element_text(hjust=1)) +
+    scale_x_discrete(drop=TRUE) +theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))+
+       guides(fill = guide_legend( keywidth = 1, keyheight = 1)) +
+    ylab("Distribution of ASVs at family level")  + theme(axis.text = element_text(face="bold"))
+p +   theme(panel.grid.major = element_blank()) +  theme(strip.text.x = element_text(size =12))   + facet_grid(cols= vars(Category2))
+ggsave("20XGenus_compo_dauer2.tiff", height = 6, width = 12)
+```
